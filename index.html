@@ -1,0 +1,2510 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Charly's Reservations</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --olive: #273b2f;
+      --cream: #f4efe5;
+      --gold: #b99a67;
+      --ink: #27302b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--ink);
+      background: var(--cream);
+    }
+
+    .hidden { display: none !important; }
+
+    /* PASSWORD GATE */
+    #password-gate {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #273b2f 0%, #1a241e 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+
+    .password-box {
+      max-width: 400px;
+      width: 90%;
+    }
+
+    .password-header {
+      text-align: center;
+      color: white;
+      margin-bottom: 2rem;
+    }
+
+    .password-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .password-form {
+      background: #fbf8f1;
+      border-radius: 24px;
+      padding: 2rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink);
+      margin-bottom: 0.5rem;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #d8ccbb;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--olive);
+      box-shadow: 0 0 0 3px rgba(39, 59, 47, 0.1);
+    }
+
+    button {
+      padding: 0.75rem 1.5rem;
+      background: var(--olive);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    button.btn-primary {
+      width: 100%;
+      padding: 1rem;
+    }
+
+    .error-msg {
+      color: #9b4a3f;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      min-height: 1.25rem;
+    }
+
+    /* MAIN CONTENT */
+    #main-content {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #273b2f 0%, #1a241e 100%);
+      color: white;
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      margin: 0;
+    }
+
+    .nav {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+    }
+
+    .view-btn {
+      padding: 0.75rem 1.5rem;
+      background: rgba(255,255,255,0.15);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .view-btn:hover {
+      background: rgba(255,255,255,0.25);
+    }
+
+    .view-btn.active {
+      background: white;
+      color: var(--olive);
+      border-color: white;
+    }
+
+    .content {
+      flex: 1;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    /* VIEWS */
+    h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      margin: 0 0 1.5rem 0;
+      color: var(--ink);
+    }
+
+    .card {
+      background: white;
+      border: 1px solid #e0d5c7;
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      color: var(--olive);
+      margin: 0;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 0.5rem;
+    }
+
+    .reservation-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .reservation-item {
+      padding: 1rem;
+      border-left: 4px solid var(--olive);
+      background: #fafafa;
+      border-radius: 4px;
+    }
+
+    .reservation-item strong {
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .reservation-item small {
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .reservation-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .reservation-info {
+      flex: 1;
+    }
+
+    .cancel-btn {
+      background: #ef4444 !important;
+      color: white !important;
+      padding: 0.5rem 1rem !important;
+      border: none !important;
+      border-radius: 6px !important;
+      font-size: 0.85rem !important;
+      cursor: pointer !important;
+      white-space: nowrap;
+      margin-left: 1rem;
+      flex-shrink: 0;
+    }
+
+    .cancel-btn:hover {
+      background: #dc2626 !important;
+      opacity: 1 !important;
+    }
+
+    .edit-res-btn {
+      background: #3b82f6 !important;
+      color: white !important;
+      padding: 0.5rem 1rem !important;
+      border: none !important;
+      border-radius: 6px !important;
+      font-size: 0.85rem !important;
+      cursor: pointer !important;
+      white-space: nowrap;
+      margin-left: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .edit-res-btn:hover {
+      background: #2563eb !important;
+      opacity: 1 !important;
+    }
+
+    .guest-left-btn {
+      background: #10b981 !important;
+      color: white !important;
+      padding: 0.5rem 1rem !important;
+      border: none !important;
+      border-radius: 6px !important;
+      font-size: 0.85rem !important;
+      cursor: pointer !important;
+      white-space: nowrap;
+      margin-left: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .guest-left-btn:hover {
+      background: #059669 !important;
+      opacity: 1 !important;
+    }
+
+    .add-table-btn {
+      background: #7c3aed !important;
+      color: white !important;
+      padding: 1.5rem !important;
+      border: 2px dashed #7c3aed !important;
+      border-radius: 8px !important;
+      font-size: 1rem !important;
+      font-weight: 600 !important;
+      cursor: pointer !important;
+      transition: all 0.2s !important;
+      width: 100%;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    .add-table-btn:hover {
+      background: #6d28d9 !important;
+      border-color: #6d28d9 !important;
+      transform: scale(1.02);
+    }
+
+    .modal-content input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #d8ccbb;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      margin-bottom: 1rem;
+    }
+
+    .date-nav {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      padding: 1rem;
+      background: white;
+      border: 1px solid #e0d5c7;
+      border-radius: 12px;
+    }
+
+    .date-nav button {
+      padding: 0.5rem 1rem;
+      background: var(--olive);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .date-nav button:hover {
+      opacity: 0.9;
+    }
+
+    .date-nav .date-display {
+      flex: 1;
+      text-align: center;
+      font-weight: 600;
+      color: var(--ink);
+      font-size: 1.1rem;
+    }
+
+    .date-nav .today-btn {
+      background: #10b981;
+    }
+
+    .date-nav #date-picker {
+      padding: 0.5rem;
+      border: 1px solid #d8ccbb;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .date-nav #date-picker:focus {
+      outline: none;
+      border-color: var(--olive);
+      box-shadow: 0 0 0 3px rgba(39, 59, 47, 0.1);
+    }
+
+    /* TABLE GRID */
+    .table-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 8px;
+      padding: 12px;
+      background: #fbf9f5;
+      border: 2px solid #d8ccbb;
+      border-radius: 8px;
+      margin: 2rem 0;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .table-cell {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      border: 2px solid;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: grab;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .table-cell:active {
+      cursor: grabbing;
+    }
+
+    .table-cell.free {
+      background: #d4edda;
+      border-color: #c3e6cb;
+      color: #155724;
+    }
+
+    .table-cell.reserved {
+      background: #f8d7da;
+      border-color: #f5c6cb;
+      color: #721c24;
+    }
+
+    .table-cell.turnover {
+      background: #fff3cd;
+      border-color: #ffeeba;
+      color: #856404;
+    }
+
+    .table-cell:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    /* TABLE PICKER (reservation form) */
+    .table-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 0.5rem;
+    }
+
+    /* VIEW-ONLY USERS: hide every control that changes data */
+    body.readonly [data-view="reserve"],
+    body.readonly [data-view="settings"],
+    body.readonly #edit-btn,
+    body.readonly .cancel-btn,
+    body.readonly .edit-res-btn,
+    body.readonly .guest-left-btn,
+    body.readonly #view-res-edit,
+    body.readonly #reservation-details button[onclick^="editReservationFromTable"] {
+      display: none !important;
+    }
+
+    .table-option {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid #d8ccbb;
+      border-radius: 8px;
+      background: #fbf9f5;
+      cursor: pointer;
+      font-size: 0.95rem;
+      text-transform: none;
+      letter-spacing: normal;
+      color: var(--ink);
+    }
+
+    .table-option input {
+      width: auto;
+      margin: 0;
+    }
+
+    .table-option:has(input:checked) {
+      border-color: var(--olive);
+      background: #e9efe9;
+    }
+
+    /* LAYOUT DATE BAR */
+    .layout-date-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .layout-date-bar input[type="date"] {
+      width: auto;
+      padding: 0.5rem;
+    }
+
+    .layout-date-bar button {
+      padding: 0.5rem 1rem;
+    }
+
+    /* MODAL */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      max-width: 400px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+    .modal-content h3 {
+      margin: 0 0 1rem 0;
+      font-family: 'Playfair Display', serif;
+      color: var(--olive);
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .modal-buttons button {
+      flex: 1;
+    }
+
+    .btn-cancel {
+      background: #e0d5c7 !important;
+      color: var(--ink) !important;
+    }
+
+    .floor-tabs {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+
+    .floor-tab {
+      padding: 0.7rem 1.2rem;
+      background: #f0ebe0;
+      border: 2px solid #d8ccbb;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+
+    .floor-tab:hover {
+      background: #e8dfd5;
+      border-color: #c9bba8;
+    }
+
+    .floor-tab.active {
+      background: var(--olive);
+      color: white;
+      border-color: var(--olive);
+    }
+
+    .floor-section {
+      display: none;
+    }
+
+    .floor-section.active {
+      display: block;
+    }
+
+    .legend {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      padding: 1rem;
+      background: white;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      border: 1px solid #e0d5c7;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.9rem;
+    }
+
+    .legend-box {
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      border: 2px solid;
+    }
+
+    .legend-box.free {
+      background: #d4edda;
+      border-color: #c3e6cb;
+    }
+
+    .legend-box.reserved {
+      background: #f8d7da;
+      border-color: #f5c6cb;
+    }
+
+    .legend-box.turnover {
+      background: #fff3cd;
+      border-color: #ffeeba;
+    }
+
+    .edit-btn {
+      background: #f0f0f0;
+      color: var(--ink);
+    }
+
+    .edit-btn:hover {
+      background: #e0e0e0;
+    }
+
+    /* NOTIFICATION TOAST */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      animation: slideIn 0.3s ease;
+      z-index: 1000;
+      max-width: 400px;
+    }
+
+    .notification.success {
+      background: #10b981;
+    }
+
+    .notification.error {
+      background: #ef4444;
+    }
+
+    .notification.info {
+      background: #3b82f6;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+
+    .notification.removing {
+      animation: slideOut 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+
+<!-- PASSWORD GATE -->
+<div id="password-gate">
+  <div class="password-box">
+    <div class="password-header">
+      <h1>Charly's</h1>
+      <p style="margin: 0; font-size: 0.9rem; opacity: 0.8;">Reservations Desk</p>
+    </div>
+    <div class="password-form">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="your@email.com" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password-input" placeholder="Password" autocomplete="current-password">
+      </div>
+      <button class="btn-primary" id="password-submit">Access Dashboard</button>
+      <div id="password-error" class="error-msg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="main-content" class="hidden">
+  <!-- HEADER -->
+  <div class="header">
+    <h1>Charly's Hot Stone Steak</h1>
+    <div class="nav">
+      <button class="view-btn active" data-view="dashboard">Dashboard</button>
+      <button class="view-btn" data-view="reserve">Reserve Table</button>
+      <button class="view-btn" data-view="floor">Table Layout</button>
+      <button class="view-btn" data-view="cancelled">Cancelled</button>
+      <button class="view-btn" data-view="settings">Settings</button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- DASHBOARD VIEW -->
+    <div id="dashboard" class="view active">
+      <div class="date-nav">
+        <button onclick="changeDate(-1)">← Previous</button>
+        <div class="date-display" id="date-display">Today</div>
+        <button onclick="changeDate(1)">Next →</button>
+        <input type="date" id="date-picker">
+        <button class="today-btn" onclick="goToToday()">Today</button>
+      </div>
+      <h2 id="dashboard-title">Today's Reservations</h2>
+      <div class="stat-row">
+        <div class="stat">
+          <p class="stat-number" id="res-count">0</p>
+          <p class="stat-label">Reservations</p>
+        </div>
+        <div class="stat">
+          <p class="stat-number" id="covers-count">0</p>
+          <p class="stat-label">Expected Covers</p>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top: 0;">Reservation Schedule</h3>
+        <div class="reservation-list" id="res-list">
+          <p style="color: #999;">No reservations today.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESERVE VIEW -->
+    <div id="reserve" class="view">
+      <h2>Add Reservation</h2>
+      <div class="card">
+        <form id="res-form">
+          <div class="form-group">
+            <label>Guest Name</label>
+            <input type="text" id="guest-name" required>
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="res-date" required>
+          </div>
+          <div class="form-group">
+            <label>Time</label>
+            <input type="time" id="res-time" required>
+          </div>
+          <div class="form-group">
+            <label>Party Size</label>
+            <input type="number" id="party-size" min="1" required>
+          </div>
+          <div class="form-group">
+            <label>Phone *</label>
+            <input type="tel" id="res-phone" required pattern="[0-9\+\-\s]*" placeholder="e.g., +201234567890">
+          </div>
+          <div class="form-group">
+            <label>Booking Method</label>
+            <select id="res-booking-method">
+              <option value="">Select booking method...</option>
+              <option value="whatsapp">WhatsApp</option>
+              <option value="phone">Phone Call</option>
+              <option value="instagram">Instagram</option>
+              <option value="website">Website</option>
+              <option value="messenger">Messenger</option>
+            </select>
+          </div>
+          <div id="custom-fields-form"></div>
+          <div class="form-group">
+            <label>Select Area</label>
+            <select id="res-area" required>
+              <option value="">Choose area...</option>
+              <option value="f0i">Floor 0 - Indoor</option>
+              <option value="f0o">Floor 0 - Outdoor</option>
+              <option value="f1i">Floor 1 - Indoor</option>
+              <option value="f1o">Floor 1 - Outdoor</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Select Table</label>
+            <div id="res-table-options" class="table-options">
+              <small style="color: #666;">Select area first...</small>
+            </div>
+            <small style="color: #666; display: block; margin-top: 0.5rem;">Tick one or more tables for this reservation.</small>
+          </div>
+          <button type="button" class="btn-primary" id="submit-reservation">Add Reservation</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- FLOOR VIEW -->
+    <div id="floor" class="view">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h2 style="margin: 0;">Table Layout</h2>
+        <button class="edit-btn" id="edit-btn">Edit Layout</button>
+      </div>
+      <div class="layout-date-bar">
+        <label for="layout-date" style="margin: 0;">Showing date</label>
+        <input type="date" id="layout-date" value="">
+        <button type="button" id="layout-today-btn">Today</button>
+      </div>
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-box free"></div>
+          <span><strong>Available</strong> - Free now</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-box reserved"></div>
+          <span><strong>Reserved</strong> - Occupied</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-box turnover"></div>
+          <span><strong>Turnover</strong> - Cleaning</span>
+        </div>
+      </div>
+      <div class="floor-tabs">
+        <button class="floor-tab active" data-floor="f0i">Floor 0 Indoor</button>
+        <button class="floor-tab" data-floor="f0o">Floor 0 Outdoor</button>
+        <button class="floor-tab" data-floor="f1i">Floor 1 Indoor</button>
+        <button class="floor-tab" data-floor="f1o">Floor 1 Outdoor</button>
+      </div>
+      <div class="floor-section active" data-floor="f0i">
+        <h3>Floor 0 Indoor</h3>
+        <div class="table-grid" id="grid-f0i"></div>
+      </div>
+      <div class="floor-section" data-floor="f0o">
+        <h3>Floor 0 Outdoor</h3>
+        <div class="table-grid" id="grid-f0o"></div>
+      </div>
+      <div class="floor-section" data-floor="f1i">
+        <h3>Floor 1 Indoor</h3>
+        <div class="table-grid" id="grid-f1i"></div>
+      </div>
+      <div class="floor-section" data-floor="f1o">
+        <h3>Floor 1 Outdoor</h3>
+        <div class="table-grid" id="grid-f1o"></div>
+      </div>
+    </div>
+
+    <!-- CANCELLED VIEW -->
+    <div id="cancelled" class="view">
+      <h2>Cancelled Reservations</h2>
+      <div class="card">
+        <div class="reservation-list" id="cancelled-list">
+          <p style="color: #999;">No cancelled reservations.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS VIEW -->
+    <div id="settings" class="view">
+      <h2>Settings</h2>
+      <div class="card">
+        <div class="form-group">
+          <label>Minimum Gap Between Reservations (minutes)</label>
+          <input type="number" id="min-gap" min="30" max="300" step="15" value="150">
+          <small style="color: #666; display: block; margin-top: 0.5rem;">Time required between reservations for turnover/cleaning.</small>
+        </div>
+        <div class="form-group">
+          <label>Reservation Duration (minutes)</label>
+          <input type="number" id="duration" min="60" max="180" step="15" value="120">
+          <small style="color: #666; display: block; margin-top: 0.5rem;">How long guests typically stay.</small>
+        </div>
+        <button onclick="saveSettings()">Save Settings</button>
+        <button style="background: #f8d7da; color: #721c24; margin-top: 1rem;" onclick="document.getElementById('clear-reservations-modal').classList.add('active')">Clear Reservations</button>
+      </div>
+
+      <div class="card" style="margin-top: 2rem;">
+        <h3 style="margin-top: 0;">Custom Reservation Fields</h3>
+        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Add custom fields to appear in reservation form (e.g., Room Preference, Special Requests)</p>
+
+        <div id="custom-fields-list" style="margin-bottom: 1.5rem;">
+          <!-- Custom fields will be listed here -->
+        </div>
+
+        <button id="manage-custom-fields-btn" style="background: #7c3aed; margin-bottom: 1rem;">+ Add Custom Field</button>
+      </div>
+
+      <div class="card" style="margin-top: 2rem;">
+        <h3 style="margin-top: 0;">Export Data</h3>
+        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Export today's reservations to your customer template file.</p>
+        <button onclick="exportGuestsToExcel()" style="background: #7c3aed; color: white; padding: 0.75rem 2rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem; width: 100%;">📥 Export Guests to Excel</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PASSWORD MODAL FOR EDIT -->
+<div id="edit-modal" class="modal">
+  <div class="modal-content">
+    <h3>Unlock Layout Editor</h3>
+    <div class="form-group">
+      <label>Enter Password</label>
+      <input type="password" id="edit-password" placeholder="Password">
+    </div>
+    <div class="modal-buttons">
+      <button id="edit-confirm">Unlock</button>
+      <button class="btn-cancel" id="edit-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- PIN MODAL FOR CANCEL RESERVATION -->
+<div id="cancel-modal" class="modal">
+  <div class="modal-content">
+    <h3>Cancel Reservation</h3>
+    <p id="cancel-info" style="margin: 1rem 0; color: #666;"></p>
+    <div class="form-group">
+      <label>Cancellation Reason (Optional)</label>
+      <input type="text" id="cancel-reason" placeholder="e.g., Guest request, No-show, Table error..." style="width: 100%;">
+    </div>
+    <div class="form-group">
+      <label>Enter PIN to Confirm</label>
+      <input type="password" id="cancel-pin" placeholder="PIN" maxlength="4">
+    </div>
+    <div class="modal-buttons">
+      <button id="cancel-confirm">Confirm Cancel</button>
+      <button class="btn-cancel" id="cancel-dismiss">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FOR EDIT RESERVATION -->
+<div id="edit-res-modal" class="modal">
+  <div class="modal-content" style="max-width: 500px;">
+    <h3>Edit Reservation</h3>
+    <div class="form-group">
+      <label>Guest Name</label>
+      <input type="text" id="edit-res-name">
+    </div>
+    <div class="form-group">
+      <label>Date</label>
+      <input type="date" id="edit-res-date">
+    </div>
+    <div class="form-group">
+      <label>Time</label>
+      <input type="time" id="edit-res-time">
+    </div>
+    <div class="form-group">
+      <label>Party Size</label>
+      <input type="number" id="edit-res-party" min="1">
+    </div>
+    <div class="form-group">
+      <label>Phone *</label>
+      <input type="tel" id="edit-res-phone" required>
+    </div>
+    <div class="form-group">
+      <label>Booking Method</label>
+      <select id="edit-res-booking-method">
+        <option value="">Select booking method...</option>
+        <option value="whatsapp">WhatsApp</option>
+        <option value="phone">Phone Call</option>
+        <option value="instagram">Instagram</option>
+        <option value="website">Website</option>
+        <option value="messenger">Messenger</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Tables</label>
+      <div id="edit-res-tables" class="table-options"></div>
+      <small style="color: #666; display: block; margin-top: 0.5rem;">Tick or untick tables to add or remove them.</small>
+    </div>
+    <div class="form-group">
+      <label>Enter PIN to Save Changes</label>
+      <input type="password" id="edit-res-pin" placeholder="PIN" maxlength="4">
+    </div>
+    <div class="modal-buttons">
+      <button id="edit-res-confirm">Save Changes</button>
+      <button class="btn-cancel" id="edit-res-dismiss">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FOR GUEST LEFT -->
+<div id="guest-left-modal" class="modal">
+  <div class="modal-content" style="max-width: 400px;">
+    <h3>Mark Table as Free</h3>
+    <p style="color: #666; margin: 1rem 0;">Confirm that the guest has left by entering the PIN.</p>
+    <div class="form-group">
+      <label>Enter PIN</label>
+      <input type="password" id="guest-left-pin" placeholder="PIN" maxlength="4">
+    </div>
+    <div class="modal-buttons">
+      <button id="guest-left-confirm">Confirm</button>
+      <button class="btn-cancel" id="guest-left-dismiss">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FOR CLEAR RESERVATIONS -->
+<div id="clear-reservations-modal" class="modal">
+  <div class="modal-content" style="max-width: 400px;">
+    <h3>Clear All Reservations</h3>
+    <p style="color: #d9534f; font-weight: 600; margin: 1rem 0;">⚠️ This will delete all active reservations!</p>
+    <div class="form-group">
+      <label>Enter Password to Confirm</label>
+      <input type="password" id="clear-reservations-password" placeholder="Password">
+    </div>
+    <div class="modal-buttons">
+      <button id="clear-reservations-confirm" style="background: #d9534f;">Clear Reservations</button>
+      <button class="btn-cancel" id="clear-reservations-dismiss">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FOR ADDING NEW TABLE -->
+<div id="add-table-modal" class="modal">
+  <div class="modal-content" style="max-width: 400px;">
+    <h3>Add New Table</h3>
+    <div class="form-group">
+      <label>Floor / Area</label>
+      <select id="add-table-floor">
+        <option value="">Select area...</option>
+        <option value="f0i">Floor 0 Indoor</option>
+        <option value="f0o">Floor 0 Outdoor</option>
+        <option value="f1i">Floor 1 Indoor</option>
+        <option value="f1o">Floor 1 Outdoor</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Table Number</label>
+      <input type="number" id="add-table-number" placeholder="e.g., 5" min="1" max="999">
+    </div>
+    <div class="modal-buttons">
+      <button id="add-table-confirm">Add Table</button>
+      <button class="btn-cancel" id="add-table-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FOR CUSTOM FIELDS PASSWORD -->
+<div id="custom-fields-password-modal" class="modal">
+  <div class="modal-content" style="max-width: 400px;">
+    <h3>Custom Fields Management</h3>
+    <p style="color: #666; margin: 1rem 0;">Enter password to manage custom fields</p>
+    <div class="form-group">
+      <label>Enter Password</label>
+      <input type="password" id="custom-fields-password" placeholder="Password">
+    </div>
+    <div class="modal-buttons">
+      <button id="custom-fields-password-confirm">Unlock</button>
+      <button class="btn-cancel" id="custom-fields-password-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FOR DELETING CUSTOM FIELD -->
+<div id="delete-field-modal" class="modal">
+  <div class="modal-content" style="max-width: 400px;">
+    <h3>Delete Custom Field</h3>
+    <p id="delete-field-message" style="color: #666; margin: 1rem 0;"></p>
+    <div class="modal-buttons">
+      <button id="delete-field-confirm" style="background: #ef4444;">Delete</button>
+      <button class="btn-cancel" id="delete-field-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FOR ADDING CUSTOM FIELD -->
+<div id="add-custom-field-modal" class="modal">
+  <div class="modal-content" style="max-width: 400px;">
+    <h3>Add Custom Field</h3>
+    <div class="form-group">
+      <label>Field Name</label>
+      <input type="text" id="custom-field-name" placeholder="e.g., Room Preference, Special Requests" maxlength="30">
+    </div>
+    <div class="form-group">
+      <label>Field Type</label>
+      <select id="custom-field-type">
+        <option value="text">Text</option>
+        <option value="number">Numbers Only</option>
+        <option value="password">Password</option>
+      </select>
+    </div>
+    <div class="modal-buttons">
+      <button id="custom-field-confirm">Add Field</button>
+      <button class="btn-cancel" id="custom-field-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FOR VIEWING TABLE RESERVATION -->
+<div id="view-reservation-modal" class="modal">
+  <div class="modal-content" style="max-width: 500px;">
+    <h3>Table Reservation</h3>
+    <div id="reservation-details" style="margin: 1.5rem 0; line-height: 1.8;">
+      <!-- Reservation details will be populated here -->
+    </div>
+    <div class="modal-buttons">
+      <button id="view-res-edit" style="background: #3b82f6;">Edit</button>
+      <button class="btn-cancel" id="view-res-close">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+const PASSWORD = 'Charlys2026';
+const GRID_SIZE = 120; // 120px per grid cell
+const GRID_COLS = 8;
+const GRID_ROWS = 4;
+
+const TABLES = {
+  f0i: [
+    { number: 1, x: 0, y: 0 },
+    { number: 2, x: 1, y: 0 },
+    { number: 3, x: 2, y: 0 },
+    { number: 4, x: 3, y: 0 }
+  ],
+  f0o: [
+    { number: 20, x: 0, y: 0 },
+    { number: 21, x: 1, y: 0 },
+    { number: 22, x: 2, y: 0 },
+    { number: 23, x: 3, y: 0 },
+    { number: 24, x: 4, y: 0 },
+    { number: 25, x: 5, y: 0 },
+    { number: 26, x: 6, y: 0 },
+    { number: 27, x: 7, y: 0 }
+  ],
+  f1i: [
+    { number: 30, x: 0, y: 0 },
+    { number: 31, x: 1, y: 0 },
+    { number: 32, x: 2, y: 0 },
+    { number: 33, x: 3, y: 0 },
+    { number: 34, x: 4, y: 0 },
+    { number: 35, x: 5, y: 0 },
+    { number: 36, x: 6, y: 0 }
+  ],
+  f1o: [
+    { number: 40, x: 0, y: 0 },
+    { number: 41, x: 1, y: 0 },
+    { number: 42, x: 2, y: 0 },
+    { number: 43, x: 3, y: 0 },
+    { number: 44, x: 4, y: 0 },
+    { number: 45, x: 5, y: 0 },
+    { number: 46, x: 6, y: 0 },
+    { number: 47, x: 7, y: 0 },
+    { number: 48, x: 0, y: 1 },
+    { number: 49, x: 1, y: 1 },
+    { number: 50, x: 2, y: 1 }
+  ]
+};
+
+let reservations = [];
+let cancelledReservations = [];
+let completedReservations = [];
+let settings = { minGap: 150, duration: 120 };
+let customFields = []; // Array of { name, type } objects
+let tables = { ...TABLES };
+let editMode = false;
+let cancelPendingIndex = null;
+let editPendingIndex = null;
+let guestLeftPendingIndex = null;
+let selectedDate = null;
+// Date shown on the Table Layout view (defaults to today)
+let layoutDate = new Date().toISOString().split('T')[0];
+const CANCEL_PIN = '1234';
+
+// LOAD DATA
+// CLOUD STORAGE (Supabase). All app data is one row in the app_state table.
+const SUPABASE_URL = 'https://mxperdgepmarvegigukw.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_1fR0uDEpoqUR450qrn-Ejg_hhOX2qQj';
+const EDITOR_EMAILS = ['david.emil@charlys-eg.com', 'charlyshotstonesteak@gmail.com'];
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let canEdit = false;
+let pendingSaves = 0;
+let saveChain = Promise.resolve();
+
+function applySnapshot(s) {
+  if (s.reservations) reservations = s.reservations;
+  if (s.cancelledReservations) cancelledReservations = s.cancelledReservations;
+  if (s.completedReservations) completedReservations = s.completedReservations;
+  if (s.settings) settings = s.settings;
+  if (s.customFields) customFields = s.customFields;
+  if (s.tables) {
+    tables = s.tables;
+    // Migrate old format (array of numbers) to new format (array of objects)
+    for (const floor in tables) {
+      if (Array.isArray(tables[floor]) && tables[floor].length > 0 && typeof tables[floor][0] === 'number') {
+        tables[floor] = tables[floor].map((num, idx) => ({
+          number: num,
+          x: idx % GRID_COLS,
+          y: Math.floor(idx / GRID_COLS)
+        }));
+      }
+    }
+  }
+}
+
+async function loadData() {
+  const { data, error } = await sb.from('app_state').select('data').eq('id', 'main').maybeSingle();
+  if (error) throw error;
+  if (data && data.data) applySnapshot(data.data);
+  document.getElementById('min-gap').value = settings.minGap;
+  document.getElementById('duration').value = settings.duration;
+  renderCustomFieldsList();
+}
+
+// Saves are queued one after another so they reach the database in order.
+function saveData() {
+  if (!canEdit) {
+    showNotification('View only: changes are not saved', 'error');
+    return;
+  }
+  const snapshot = { reservations, cancelledReservations, completedReservations, settings, customFields, tables };
+  pendingSaves++;
+  saveChain = saveChain.then(async () => {
+    const { error } = await sb.from('app_state').upsert({ id: 'main', data: snapshot, updated_at: new Date().toISOString() });
+    if (error) showNotification('Could not save: ' + error.message, 'error');
+  }).finally(() => {
+    pendingSaves--;
+  });
+}
+
+// Pull changes made on other devices every 10 seconds
+async function refreshFromCloud() {
+  if (pendingSaves > 0 || document.querySelector('.modal.active')) return;
+  try {
+    const { data, error } = await sb.from('app_state').select('data').eq('id', 'main').maybeSingle();
+    if (error || !data || !data.data || pendingSaves > 0) return;
+    applySnapshot(data.data);
+    updateDashboard();
+    updateCancelledList();
+    renderFloor();
+  } catch (e) {
+    // Offline or temporary error: try again on the next tick
+  }
+}
+
+// LOGIN
+document.getElementById('password-submit').addEventListener('click', async () => {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('password-input').value;
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) {
+    document.getElementById('password-error').textContent = 'Incorrect email or password';
+    return;
+  }
+  showDashboard();
+});
+
+async function showDashboard() {
+  document.getElementById('password-gate').classList.add('hidden');
+  document.getElementById('main-content').classList.remove('hidden');
+
+  const { data: { user } } = await sb.auth.getUser();
+  canEdit = !!user && EDITOR_EMAILS.includes((user.email || '').toLowerCase());
+  document.body.classList.toggle('readonly', !canEdit);
+
+  try {
+    await loadData();
+  } catch (e) {
+    showNotification('Could not load reservations: ' + e.message, 'error');
+  }
+  setupEventListeners();
+  updateDashboard();
+  updateCancelledList();
+  renderFloor();
+  setupTableSelection();
+  setInterval(refreshFromCloud, 10000);
+}
+
+// Stay signed in if a session already exists
+sb.auth.getSession().then(({ data }) => {
+  if (data.session) showDashboard();
+});
+
+// VIEW SWITCHING
+function setupEventListeners() {
+  // View buttons
+  document.querySelectorAll('.view-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const viewName = btn.dataset.view;
+      switchView(viewName);
+    });
+  });
+
+  // Floor tabs
+  document.querySelectorAll('.floor-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const floor = tab.dataset.floor;
+      document.querySelectorAll('.floor-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.floor-section').forEach(s => s.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelector(`.floor-section[data-floor="${floor}"]`).classList.add('active');
+    });
+  });
+
+  // Edit button
+  document.getElementById('edit-btn').addEventListener('click', () => {
+    if (editMode) {
+      // Exit edit mode
+      editMode = false;
+      document.getElementById('edit-btn').textContent = 'Edit Layout';
+      document.getElementById('edit-btn').style.background = '';
+      showNotification('Edit mode disabled', 'info');
+      renderFloor();
+    } else {
+      // Enter edit mode - show password modal
+      document.getElementById('edit-modal').classList.add('active');
+      document.getElementById('edit-password').focus();
+    }
+  });
+
+  document.getElementById('edit-confirm').addEventListener('click', () => {
+    const pwd = document.getElementById('edit-password').value;
+    if (pwd === PASSWORD) {
+      editMode = true;
+      document.getElementById('edit-modal').classList.remove('active');
+      document.getElementById('edit-password').value = '';
+      document.getElementById('edit-btn').textContent = '✓ Done Editing';
+      document.getElementById('edit-btn').style.background = '#10b981';
+      document.getElementById('edit-btn').style.color = 'white';
+      showNotification('Edit mode enabled', 'info');
+      renderFloor();
+    } else {
+      showNotification('Incorrect password', 'error');
+      document.getElementById('edit-password').value = '';
+    }
+  });
+
+  document.getElementById('edit-cancel').addEventListener('click', () => {
+    document.getElementById('edit-modal').classList.remove('active');
+    document.getElementById('edit-password').value = '';
+  });
+
+  // Cancel reservation modal
+  document.getElementById('cancel-confirm').addEventListener('click', confirmCancelReservation);
+
+  document.getElementById('cancel-dismiss').addEventListener('click', () => {
+    document.getElementById('cancel-modal').classList.remove('active');
+    document.getElementById('cancel-pin').value = '';
+    cancelPendingIndex = null;
+  });
+
+  // Allow Enter key in PIN field to submit
+  document.getElementById('cancel-pin').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') confirmCancelReservation();
+  });
+
+  // Edit reservation modal
+  document.getElementById('edit-res-confirm').addEventListener('click', confirmEditReservation);
+
+  document.getElementById('edit-res-dismiss').addEventListener('click', () => {
+    document.getElementById('edit-res-modal').classList.remove('active');
+    document.getElementById('edit-res-pin').value = '';
+    editPendingIndex = null;
+  });
+
+  // Allow Enter key in PIN field to submit
+  document.getElementById('edit-res-pin').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') confirmEditReservation();
+  });
+
+  // Guest left modal
+  document.getElementById('guest-left-confirm').addEventListener('click', confirmGuestLeft);
+
+  document.getElementById('guest-left-dismiss').addEventListener('click', () => {
+    document.getElementById('guest-left-modal').classList.remove('active');
+    document.getElementById('guest-left-pin').value = '';
+    guestLeftPendingIndex = null;
+  });
+
+  // Allow Enter key in PIN field to submit
+  document.getElementById('guest-left-pin').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') confirmGuestLeft();
+  });
+
+  // Clear reservations modal
+  document.getElementById('clear-reservations-confirm').addEventListener('click', confirmClearReservations);
+
+  document.getElementById('clear-reservations-dismiss').addEventListener('click', () => {
+    document.getElementById('clear-reservations-modal').classList.remove('active');
+    document.getElementById('clear-reservations-password').value = '';
+  });
+
+  // View reservation modal
+  document.getElementById('view-res-close').addEventListener('click', () => {
+    document.getElementById('view-reservation-modal').classList.remove('active');
+  });
+
+  // Add table modal
+  document.getElementById('add-table-confirm').addEventListener('click', confirmAddTable);
+
+  document.getElementById('add-table-cancel').addEventListener('click', () => {
+    document.getElementById('add-table-modal').classList.remove('active');
+    document.getElementById('add-table-floor').value = '';
+    document.getElementById('add-table-number').value = '';
+  });
+
+  document.getElementById('add-table-number').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') confirmAddTable();
+  });
+
+  // Custom fields password modal
+  document.getElementById('manage-custom-fields-btn').addEventListener('click', () => {
+    document.getElementById('custom-fields-password-modal').classList.add('active');
+    document.getElementById('custom-fields-password').focus();
+  });
+
+  document.getElementById('custom-fields-password-confirm').addEventListener('click', () => {
+    const pwd = document.getElementById('custom-fields-password').value;
+    if (pwd === PASSWORD) {
+      document.getElementById('custom-fields-password-modal').classList.remove('active');
+      document.getElementById('custom-fields-password').value = '';
+      document.getElementById('add-custom-field-modal').classList.add('active');
+      document.getElementById('custom-field-name').focus();
+    } else {
+      showNotification('Incorrect password', 'error');
+      document.getElementById('custom-fields-password').value = '';
+    }
+  });
+
+  document.getElementById('custom-fields-password-cancel').addEventListener('click', () => {
+    document.getElementById('custom-fields-password-modal').classList.remove('active');
+    document.getElementById('custom-fields-password').value = '';
+  });
+
+  document.getElementById('custom-fields-password').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      const pwd = document.getElementById('custom-fields-password').value;
+      if (pwd === PASSWORD) {
+        document.getElementById('custom-fields-password-modal').classList.remove('active');
+        document.getElementById('custom-fields-password').value = '';
+        document.getElementById('add-custom-field-modal').classList.add('active');
+        document.getElementById('custom-field-name').focus();
+      } else {
+        showNotification('Incorrect password', 'error');
+        document.getElementById('custom-fields-password').value = '';
+      }
+    }
+  });
+
+  // Custom field modal
+  document.getElementById('custom-field-confirm').addEventListener('click', addCustomField);
+
+  document.getElementById('custom-field-cancel').addEventListener('click', () => {
+    document.getElementById('add-custom-field-modal').classList.remove('active');
+    document.getElementById('custom-field-name').value = '';
+    document.getElementById('custom-field-type').value = 'text';
+  });
+
+  document.getElementById('custom-field-name').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addCustomField();
+  });
+
+  // Handle field delete button clicks
+  let deleteFieldPendingIdx = null;
+  document.addEventListener('click', function(e) {
+    if (e.target && e.target.classList && e.target.classList.contains('field-delete-btn')) {
+      deleteFieldPendingIdx = parseInt(e.target.dataset.idx);
+      const fieldName = customFields[deleteFieldPendingIdx].name;
+      document.getElementById('delete-field-message').textContent = `Are you sure you want to delete "${fieldName}"?`;
+      document.getElementById('delete-field-modal').classList.add('active');
+    }
+  });
+
+  // Delete field modal handlers
+  document.getElementById('delete-field-confirm').addEventListener('click', function() {
+    if (deleteFieldPendingIdx !== null) {
+      customFields.splice(deleteFieldPendingIdx, 1);
+      saveData();
+      renderCustomFieldsList();
+      renderReservationCustomFields();
+      showNotification('Field deleted successfully', 'success');
+      document.getElementById('delete-field-modal').classList.remove('active');
+      deleteFieldPendingIdx = null;
+    }
+  });
+
+  document.getElementById('delete-field-cancel').addEventListener('click', function() {
+    document.getElementById('delete-field-modal').classList.remove('active');
+    deleteFieldPendingIdx = null;
+  });
+
+  // Allow Enter key in password field to submit
+  document.getElementById('clear-reservations-password').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') confirmClearReservations();
+  });
+
+  // Reservation form button click handler
+  document.getElementById('submit-reservation').addEventListener('click', () => {
+    const name = document.getElementById('guest-name').value.trim();
+    const date = document.getElementById('res-date').value;
+    const time = document.getElementById('res-time').value;
+    const party = document.getElementById('party-size').value;
+    const phone = document.getElementById('res-phone').value.trim();
+    const selectedTables = [...document.querySelectorAll('#res-table-options input[type="checkbox"]:checked')]
+      .map(cb => parseInt(cb.value));
+
+    // Validation checks with notifications
+    if (!name) {
+      showNotification('Please enter guest name', 'error');
+      return;
+    }
+
+    if (!date) {
+      showNotification('Please select a date', 'error');
+      return;
+    }
+
+    if (!time) {
+      showNotification('Please select a time', 'error');
+      return;
+    }
+
+    if (!party) {
+      showNotification('Please enter party size', 'error');
+      return;
+    }
+
+    if (!phone) {
+      showNotification('Phone number is required', 'error');
+      return;
+    }
+
+    if (!selectedTables.length) {
+      showNotification('Please select at least one table', 'error');
+      return;
+    }
+
+    // Check every selected table is free at that time
+    const busy = selectedTables.filter(t => !isTableAvailable(t, date, time));
+    if (busy.length) {
+      showNotification(`Not available at that time: Table ${busy.join(', ')}. Choose another time or table.`, 'error');
+      return;
+    }
+
+    // Create reservation
+    const bookingMethod = document.getElementById('res-booking-method').value;
+    const res = {
+      name,
+      date,
+      time,
+      party: parseInt(party),
+      phone,
+      bookingMethod,
+      table: selectedTables[0],
+      tables: selectedTables,
+      customData: {}
+    };
+
+    // Add custom field values
+    customFields.forEach(field => {
+      const fieldInput = document.getElementById(`custom-${field.name}`);
+      if (fieldInput) {
+        res.customData[field.name] = fieldInput.value;
+      }
+    });
+
+    reservations.push(res);
+    saveData();
+    showNotification('✓ Reservation added successfully!', 'success');
+    document.getElementById('res-form').reset();
+    document.getElementById('res-date').valueAsDate = new Date();
+    renderTableOptions('');
+    updateDashboard();
+    renderFloor();
+  });
+
+  // Date picker
+  document.getElementById('date-picker').addEventListener('change', (e) => {
+    if (e.target.value) {
+      setSelectedDate(e.target.value);
+    }
+  });
+
+  // Layout date picker
+  document.getElementById('layout-date').addEventListener('change', (e) => {
+    setLayoutDate(e.target.value);
+  });
+  document.getElementById('layout-today-btn').addEventListener('click', () => {
+    setLayoutDate(new Date().toISOString().split('T')[0]);
+  });
+}
+
+function switchView(viewName) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+
+  document.getElementById(viewName).classList.add('active');
+  document.querySelector(`[data-view="${viewName}"]`).classList.add('active');
+
+  if (viewName === 'floor') renderFloor();
+  if (viewName === 'dashboard') updateDashboard();
+  if (viewName === 'cancelled') updateCancelledList();
+}
+
+// TABLE FUNCTIONS
+// A reservation can hold several tables. Older reservations only have `table`.
+function resTables(r) {
+  return (r.tables && r.tables.length) ? r.tables : [r.table];
+}
+
+function tableLabel(r) {
+  const list = resTables(r);
+  return list.length > 1 ? `Tables ${list.join(', ')}` : `Table ${list[0]}`;
+}
+
+function timeToMin(time) {
+  const [h, m] = time.split(':').map(Number);
+  return h * 60 + m;
+}
+
+function getTableStatus(table, date, time) {
+  const today = new Date().toISOString().split('T')[0];
+  const now = new Date();
+  const currentMin = now.getHours() * 60 + now.getMinutes();
+
+  const dayRes = reservations.filter(r => resTables(r).includes(table) && r.date === date);
+
+  if (!dayRes.length) {
+    if (date === today && timeToMin(time) < currentMin) return 'past';
+    return 'free';
+  }
+
+  const timeMin = timeToMin(time);
+  for (let res of dayRes) {
+    const resStart = timeToMin(res.time);
+    const resEnd = resStart + settings.duration;
+
+    // Check if time slot overlaps with reservation or 150-min gap before/after
+    if (timeMin >= resStart && timeMin < resEnd) return 'reserved';
+    if (timeMin < resStart && timeMin + settings.duration > resStart - settings.minGap) return 'reserved';
+    if (timeMin >= resEnd && timeMin < resEnd + settings.minGap) return 'reserved';
+  }
+  return 'free';
+}
+
+function isTableAvailable(table, date, time) {
+  const status = getTableStatus(table, date, time);
+  return status === 'free';
+}
+
+function showCancelModal(index) {
+  const res = reservations[index];
+  cancelPendingIndex = index;
+  document.getElementById('cancel-info').textContent = `${res.name} • ${tableLabel(res)} at ${res.time}`;
+  document.getElementById('cancel-reason').value = '';
+  document.getElementById('cancel-pin').value = '';
+  document.getElementById('cancel-modal').classList.add('active');
+  document.getElementById('cancel-reason').focus();
+}
+
+function showEditModal(index) {
+  const res = reservations[index];
+  editPendingIndex = index;
+  document.getElementById('edit-res-name').value = res.name;
+  document.getElementById('edit-res-date').value = res.date;
+  document.getElementById('edit-res-time').value = res.time;
+  document.getElementById('edit-res-party').value = res.party;
+  document.getElementById('edit-res-phone').value = res.phone || '';
+  document.getElementById('edit-res-booking-method').value = res.bookingMethod || '';
+  document.getElementById('edit-res-pin').value = '';
+  renderEditTableOptions(res);
+  document.getElementById('edit-res-modal').classList.add('active');
+  document.getElementById('edit-res-name').focus();
+}
+
+// Lists every table on every floor, with this reservation's tables ticked
+function renderEditTableOptions(res) {
+  const container = document.getElementById('edit-res-tables');
+  const current = resTables(res);
+  const floorNames = { f0i: 'Floor 0 - Indoor', f0o: 'Floor 0 - Outdoor', f1i: 'Floor 1 - Indoor', f1o: 'Floor 1 - Outdoor' };
+
+  container.innerHTML = Object.entries(tables).map(([floor, list]) => `
+    <div style="grid-column: 1 / -1; font-size: 0.8rem; color: #666; margin-top: 0.25rem;">${floorNames[floor] || floor}</div>
+    ${list.map(t => `
+      <label class="table-option">
+        <input type="checkbox" value="${t.number}" ${current.includes(t.number) ? 'checked' : ''}>
+        <span>Table ${t.number}</span>
+      </label>
+    `).join('')}
+  `).join('');
+}
+
+function showGuestLeftModal(index) {
+  const res = reservations[index];
+  guestLeftPendingIndex = index;
+  document.getElementById('guest-left-pin').value = '';
+  document.getElementById('guest-left-modal').classList.add('active');
+  document.getElementById('guest-left-pin').focus();
+}
+
+function confirmGuestLeft() {
+  const pin = document.getElementById('guest-left-pin').value;
+
+  if (pin !== CANCEL_PIN) {
+    showNotification('Incorrect PIN', 'error');
+    document.getElementById('guest-left-pin').value = '';
+    return;
+  }
+
+  if (guestLeftPendingIndex === null) return;
+
+  const res = reservations[guestLeftPendingIndex];
+  reservations.splice(guestLeftPendingIndex, 1);
+  saveData();
+
+  document.getElementById('guest-left-modal').classList.remove('active');
+  document.getElementById('guest-left-pin').value = '';
+  guestLeftPendingIndex = null;
+
+  showNotification(`Guest left from ${tableLabel(res).toLowerCase()}`, 'success');
+  updateDashboard();
+  renderFloor();
+}
+
+function confirmClearReservations() {
+  const pwd = document.getElementById('clear-reservations-password').value;
+
+  if (pwd !== PASSWORD) {
+    showNotification('Incorrect password', 'error');
+    document.getElementById('clear-reservations-password').value = '';
+    return;
+  }
+
+  // Clear only active reservations
+  reservations = [];
+
+  // Save data
+  saveData();
+
+  // Close modal and reset form
+  document.getElementById('clear-reservations-modal').classList.remove('active');
+  document.getElementById('clear-reservations-password').value = '';
+
+  showNotification('All reservations cleared', 'success');
+  updateDashboard();
+  renderFloor();
+  setupTableSelection();
+}
+
+function confirmAddTable() {
+  const floor = document.getElementById('add-table-floor').value;
+  const tableNum = parseInt(document.getElementById('add-table-number').value);
+
+  if (!floor) {
+    showNotification('Please select a floor/area', 'error');
+    return;
+  }
+
+  if (!tableNum || tableNum < 1) {
+    showNotification('Please enter a valid table number', 'error');
+    return;
+  }
+
+  // Check if table already exists in any floor
+  for (const f in tables) {
+    if (tables[f].some(t => t.number === tableNum)) {
+      showNotification(`Table ${tableNum} already exists`, 'error');
+      return;
+    }
+  }
+
+  // Find next available position
+  let maxX = -1, maxY = 0;
+  tables[floor].forEach(t => {
+    if (t.y > maxY) {
+      maxY = t.y;
+      maxX = 0;
+    } else if (t.y === maxY && t.x > maxX) {
+      maxX = t.x;
+    }
+  });
+
+  let newX = maxX + 1;
+  let newY = maxY;
+  if (newX >= GRID_COLS) {
+    newX = 0;
+    newY = maxY + 1;
+  }
+
+  // Add table to the selected floor
+  if (!tables[floor]) {
+    tables[floor] = [];
+  }
+  tables[floor].push({ number: tableNum, x: newX, y: newY });
+  tables[floor].sort((a, b) => a.number - b.number); // Keep in numerical order
+
+  // Save data
+  saveData();
+
+  // Close modal and reset form
+  document.getElementById('add-table-modal').classList.remove('active');
+  document.getElementById('add-table-floor').value = '';
+  document.getElementById('add-table-number').value = '';
+
+  showNotification(`Table ${tableNum} added successfully`, 'success');
+  renderFloor();
+  setupTableSelection();
+}
+
+function addCustomField() {
+  const name = document.getElementById('custom-field-name').value.trim();
+  const type = document.getElementById('custom-field-type').value;
+
+  if (!name) {
+    showNotification('Please enter a field name', 'error');
+    return;
+  }
+
+  // Check for duplicates
+  if (customFields.some(f => f.name.toLowerCase() === name.toLowerCase())) {
+    showNotification('Field already exists', 'error');
+    return;
+  }
+
+  customFields.push({ name, type });
+  saveData();
+
+  // Close modal and reset
+  document.getElementById('add-custom-field-modal').classList.remove('active');
+  document.getElementById('custom-field-name').value = '';
+  document.getElementById('custom-field-type').value = 'text';
+
+  renderCustomFieldsList();
+  renderReservationCustomFields();
+  showNotification(`Field "${name}" added successfully`, 'success');
+}
+
+function deleteCustomField(name) {
+  if (confirm(`Delete field "${name}"?`)) {
+    customFields = customFields.filter(f => f.name !== name);
+    saveData();
+    renderCustomFieldsList();
+    renderReservationCustomFields();
+    showNotification(`Field "${name}" deleted`, 'success');
+  }
+}
+
+function deleteFieldByIndex(idx) {
+  const fieldName = customFields[idx].name;
+  if (confirm(`Delete field "${fieldName}"?`)) {
+    customFields.splice(idx, 1);
+    saveData();
+    renderCustomFieldsList();
+    renderReservationCustomFields();
+    showNotification(`Field "${fieldName}" deleted`, 'success');
+  }
+}
+
+function renderCustomFieldsList() {
+  const container = document.getElementById('custom-fields-list');
+  if (customFields.length === 0) {
+    container.innerHTML = '<p style="color: #999; font-size: 0.9rem;">No custom fields yet</p>';
+    return;
+  }
+
+  let html = '';
+  customFields.forEach((field, idx) => {
+    const typeLabel = field.type === 'number' ? 'Numbers' : field.type === 'password' ? 'Password' : 'Text';
+    html += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: #f9f7f3; border-radius: 6px; margin-bottom: 0.5rem;">
+      <div>
+        <strong>${field.name}</strong>
+        <span style="color: #999; font-size: 0.85rem; margin-left: 0.5rem;">(${typeLabel})</span>
+      </div>
+      <button type="button" class="field-delete-btn" data-idx="${idx}" style="background: #ef4444; padding: 0.4rem 0.8rem; font-size: 0.85rem; color: white; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
+    </div>`;
+  });
+  container.innerHTML = html;
+
+}
+
+function confirmCancelReservation() {
+  const pin = document.getElementById('cancel-pin').value;
+
+  if (pin !== CANCEL_PIN) {
+    showNotification('Incorrect PIN', 'error');
+    document.getElementById('cancel-pin').value = '';
+    return;
+  }
+
+  if (cancelPendingIndex === null) return;
+
+  const res = reservations[cancelPendingIndex];
+  const reason = document.getElementById('cancel-reason').value.trim();
+  const now = new Date();
+  const cancelledAt = now.toISOString().split('T')[0] + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+
+  // Move to cancelled reservations with cancellation timestamp and reason
+  const cancelledRes = { ...res, cancelledAt, reason: reason || 'No reason provided' };
+  cancelledReservations.push(cancelledRes);
+
+  reservations.splice(cancelPendingIndex, 1);
+  saveData();
+
+  document.getElementById('cancel-modal').classList.remove('active');
+  document.getElementById('cancel-reason').value = '';
+  document.getElementById('cancel-pin').value = '';
+  cancelPendingIndex = null;
+
+  showNotification(`Reservation for ${res.name} cancelled`, 'success');
+  updateDashboard();
+  updateCancelledList();
+  renderFloor();
+}
+
+function confirmEditReservation() {
+  const pin = document.getElementById('edit-res-pin').value;
+
+  if (pin !== CANCEL_PIN) {
+    showNotification('Incorrect PIN', 'error');
+    document.getElementById('edit-res-pin').value = '';
+    return;
+  }
+
+  if (editPendingIndex === null) return;
+
+  const name = document.getElementById('edit-res-name').value.trim();
+  const date = document.getElementById('edit-res-date').value;
+  const time = document.getElementById('edit-res-time').value;
+  const party = document.getElementById('edit-res-party').value;
+  const phone = document.getElementById('edit-res-phone').value.trim();
+
+  // Validation
+  if (!name) {
+    showNotification('Please enter guest name', 'error');
+    return;
+  }
+  if (!date) {
+    showNotification('Please select a date', 'error');
+    return;
+  }
+  if (!time) {
+    showNotification('Please select a time', 'error');
+    return;
+  }
+  if (!party) {
+    showNotification('Please enter party size', 'error');
+    return;
+  }
+  if (!phone) {
+    showNotification('Phone number is required', 'error');
+    return;
+  }
+
+  const oldRes = reservations[editPendingIndex];
+
+  const newTables = [...document.querySelectorAll('#edit-res-tables input[type="checkbox"]:checked')]
+    .map(cb => parseInt(cb.value));
+
+  if (!newTables.length) {
+    showNotification('Please keep at least one table', 'error');
+    return;
+  }
+
+  // Check every selected table is free at the new time (exclude this reservation)
+  const timeMin = timeToMin(time);
+  const busy = newTables.filter(tableNum => {
+    const dayRes = reservations.filter((r, idx) => idx !== editPendingIndex && r.date === date && resTables(r).includes(tableNum));
+    return dayRes.some(res => {
+      const resStart = timeToMin(res.time);
+      const resEnd = resStart + settings.duration;
+      if (timeMin >= resStart && timeMin < resEnd) return true;
+      if (timeMin + settings.duration > resStart && timeMin < resStart) return true;
+      if (timeMin < resEnd + settings.minGap && timeMin >= resEnd) return true;
+      return false;
+    });
+  });
+
+  if (busy.length) {
+    showNotification(`Not available at that time: Table ${busy.join(', ')}. Choose another time or table.`, 'error');
+    return;
+  }
+
+  // Update reservation
+  const bookingMethod = document.getElementById('edit-res-booking-method').value;
+  reservations[editPendingIndex] = {
+    name,
+    date,
+    time,
+    party: parseInt(party),
+    phone,
+    bookingMethod,
+    table: newTables[0],
+    tables: newTables,
+    customData: oldRes.customData || {}
+  };
+
+  saveData();
+
+  document.getElementById('edit-res-modal').classList.remove('active');
+  document.getElementById('edit-res-pin').value = '';
+  editPendingIndex = null;
+
+  showNotification(`Reservation for ${name} updated`, 'success');
+  updateDashboard();
+  renderFloor();
+}
+
+function changeDate(days) {
+  const today = new Date();
+  const currentDate = selectedDate ? new Date(selectedDate) : today;
+  currentDate.setDate(currentDate.getDate() + days);
+  const newDate = currentDate.toISOString().split('T')[0];
+  setSelectedDate(newDate);
+}
+
+function goToToday() {
+  const today = new Date().toISOString().split('T')[0];
+  setSelectedDate(today);
+}
+
+function setSelectedDate(date) {
+  selectedDate = date;
+  updateDashboard();
+
+  // Update date picker input
+  document.getElementById('date-picker').value = date;
+
+  // Update display
+  const displayDate = new Date(date + 'T00:00:00');
+  const isToday = date === new Date().toISOString().split('T')[0];
+  const dateStr = isToday ? 'Today' : displayDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+  document.getElementById('date-display').textContent = dateStr;
+  document.getElementById('dashboard-title').textContent = isToday ? "Today's Reservations" : `Reservations - ${dateStr}`;
+}
+
+function updateDashboard() {
+  const today = new Date().toISOString().split('T')[0];
+  const displayDate = selectedDate || today;
+  const today_res = reservations.filter(r => r.date === displayDate);
+  const today_cancelled = cancelledReservations.filter(r => r.date === displayDate);
+
+  document.getElementById('res-count').textContent = today_res.length;
+  document.getElementById('covers-count').textContent = today_res.reduce((sum, r) => sum + r.party, 0);
+
+  const list = document.getElementById('res-list');
+  let html = '';
+
+  // Active reservations
+  if (today_res.length) {
+    html += today_res.sort((a, b) => a.time.localeCompare(b.time)).map((r, idx) => {
+      const realIndex = reservations.indexOf(r);
+      const bookingMethodLabel = {
+        whatsapp: '📱 WhatsApp',
+        phone: '☎️ Phone',
+        instagram: '📸 Instagram',
+        website: '🌐 Website',
+        messenger: '💬 Messenger'
+      }[r.bookingMethod] || '';
+      return `
+        <div class="reservation-item">
+          <div class="reservation-info">
+            <strong>${r.name}</strong>
+            <small>${tableLabel(r)} at ${r.time} • ${r.party} guests</small>
+            ${bookingMethodLabel ? `<small style="color: #7c3aed; margin-top: 0.25rem; display: block;">${bookingMethodLabel}</small>` : ''}
+          </div>
+          ${displayReservationActions(realIndex)}
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Cancelled reservations for selected date
+  if (today_cancelled.length) {
+    const isToday = displayDate === new Date().toISOString().split('T')[0];
+    const dateLabel = isToday ? 'Today' : 'on this date';
+    html += `<div style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #e0d5c7;"><p style="font-weight: 600; color: #666; margin-top: 0;">Cancelled ${dateLabel}</p>`;
+    html += today_cancelled.sort((a, b) => b.cancelledAt.localeCompare(a.cancelledAt)).map((r) => `
+      <div class="reservation-item">
+        <div class="reservation-info">
+          <strong style="color: #ef4444;">${r.name}</strong>
+          <small>${tableLabel(r)} at ${r.time} • ${r.party} guests</small>
+          <small style="display: block; color: #999; margin-top: 0.25rem;">Reason: ${r.reason}</small>
+        </div>
+      </div>
+    `).join('');
+    html += '</div>';
+  }
+
+  if (!today_res.length && !today_cancelled.length) {
+    const isToday = displayDate === new Date().toISOString().split('T')[0];
+    list.innerHTML = isToday ? '<p style="color: #999;">No reservations today.</p>' : '<p style="color: #999;">No reservations on this date.</p>';
+    return;
+  }
+
+  list.innerHTML = html;
+}
+
+function displayReservationActions(reservationIndex) {
+  return `
+    <div style="display: flex; gap: 0.5rem;">
+      <button class="edit-res-btn" onclick="showEditModal(${reservationIndex})">Edit</button>
+      <button class="cancel-btn" onclick="showCancelModal(${reservationIndex})">Cancel</button>
+      <button class="guest-left-btn" onclick="showGuestLeftModal(${reservationIndex})">Guest Left</button>
+    </div>
+  `;
+}
+
+function updateCancelledList() {
+  const list = document.getElementById('cancelled-list');
+  if (!cancelledReservations.length) {
+    list.innerHTML = '<p style="color: #999;">No cancelled reservations.</p>';
+    return;
+  }
+
+  list.innerHTML = cancelledReservations.sort((a, b) => b.cancelledAt.localeCompare(a.cancelledAt)).map((r) => `
+    <div class="reservation-item">
+      <div class="reservation-info">
+        <strong>${r.name}</strong>
+        <small>${tableLabel(r)} • Reservation: ${r.date} at ${r.time} • ${r.party} guests</small>
+        <small style="display: block; color: #999; margin-top: 0.25rem;">Reason: ${r.reason}</small>
+        <small style="display: block; color: #999;">Cancelled: ${r.cancelledAt}</small>
+      </div>
+    </div>
+  `).join('');
+}
+
+let draggedTable = null;
+let draggedFloor = null;
+
+function showTableReservation(tableNumber, date) {
+  const tableReservations = reservations.filter(r => resTables(r).includes(tableNumber) && r.date === date).sort((a, b) => a.time.localeCompare(b.time));
+  const detailsDiv = document.getElementById('reservation-details');
+
+  if (tableReservations.length === 0) {
+    detailsDiv.innerHTML = `<p style="color: #666; text-align: center;">No reservation for Table ${tableNumber} on ${date}</p>`;
+    document.getElementById('view-res-edit').style.display = 'none';
+  } else {
+    let html = '';
+    tableReservations.forEach((reservation) => {
+      html += `
+        <div style="background: #f9f7f3; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <strong>${reservation.name}</strong>
+            <button onclick="editReservationFromTable(${reservations.indexOf(reservation)})" style="background: #3b82f6; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">Edit</button>
+          </div>
+          <div><strong>Time:</strong> ${reservation.time}</div>
+          <div><strong>Party Size:</strong> ${reservation.party} guests</div>
+          <div><strong>Phone:</strong> ${reservation.phone || 'N/A'}</div>
+      `;
+
+      if (reservation.bookingMethod) {
+        html += `<div><strong>Booking Method:</strong> ${reservation.bookingMethod}</div>`;
+      }
+
+      if (reservation.customData && Object.keys(reservation.customData).length > 0) {
+        for (const [key, val] of Object.entries(reservation.customData)) {
+          if (val) html += `<div><strong>${key}:</strong> ${val}</div>`;
+        }
+      }
+
+      html += `</div>`;
+    });
+
+    detailsDiv.innerHTML = html;
+    document.getElementById('view-res-edit').style.display = 'none';
+  }
+
+  document.getElementById('view-reservation-modal').classList.add('active');
+}
+
+function editReservationFromTable(index) {
+  document.getElementById('view-reservation-modal').classList.remove('active');
+  editPendingIndex = index;
+  showEditModal(index);
+}
+
+function renderFloor() {
+  const viewDate = layoutDate;
+  const now = new Date();
+  const currentTime = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+  const dateInput = document.getElementById('layout-date');
+  if (dateInput && dateInput.value !== viewDate) dateInput.value = viewDate;
+
+  for (const [floor, tableList] of Object.entries(tables)) {
+    const grid = document.getElementById(`grid-${floor}`);
+    grid.innerHTML = '';
+
+    // Set grid to fixed 8x4 layout
+    grid.style.display = 'grid';
+    grid.style.gridTemplateColumns = 'repeat(8, 1fr)';
+    grid.style.gap = '8px';
+    grid.style.padding = '12px';
+    grid.style.width = '100%';
+    grid.style.maxWidth = '900px';
+
+    // Create grid cells
+    const cells = {};
+    for (let y = 0; y < GRID_ROWS; y++) {
+      for (let x = 0; x < GRID_COLS; x++) {
+        const cell = document.createElement('div');
+        cell.style.aspectRatio = '1';
+        cell.style.border = '2px solid #e0d5c7';
+        cell.style.borderRadius = '6px';
+        cell.style.background = '#faf8f4';
+        cell.style.display = 'flex';
+        cell.style.alignItems = 'center';
+        cell.style.justifyContent = 'center';
+        cell.dataset.x = x;
+        cell.dataset.y = y;
+        cell.dataset.floor = floor;
+
+        if (editMode) {
+          cell.style.cursor = 'pointer';
+          cell.addEventListener('dragover', (e) => e.preventDefault());
+          cell.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (draggedTable && draggedFloor === floor) {
+              draggedTable.x = parseInt(x);
+              draggedTable.y = parseInt(y);
+              saveData();
+              renderFloor();
+            }
+          });
+        }
+
+        grid.appendChild(cell);
+        cells[`${x},${y}`] = cell;
+      }
+    }
+
+    // Place tables on grid
+    for (const table of tableList) {
+      const booked = reservations
+        .filter(r => r.date === viewDate && resTables(r).includes(table.number))
+        .sort((a, b) => a.time.localeCompare(b.time));
+      const isToday = viewDate === new Date().toISOString().split('T')[0];
+      // Today uses the live time window; other dates show whether the table is booked that day
+      const status = isToday
+        ? getTableStatus(table.number, viewDate, currentTime)
+        : (booked.length ? 'reserved' : 'free');
+      const cellKey = `${table.x},${table.y}`;
+      const cell = cells[cellKey];
+
+      if (cell) {
+        const div = document.createElement('div');
+        div.className = `table-cell ${status}`;
+        div.style.flexDirection = 'column';
+        div.style.gap = '2px';
+
+        const numLabel = document.createElement('div');
+        numLabel.textContent = `T${table.number}`;
+        div.appendChild(numLabel);
+
+        if (booked.length) {
+          const info = document.createElement('div');
+          const first = booked[0];
+          info.textContent = `${first.name} · ${first.time}${booked.length > 1 ? ` (+${booked.length - 1})` : ''}`;
+          info.style.cssText = 'font-size: 0.7rem; font-weight: 500; line-height: 1.2; padding: 0 4px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
+          div.appendChild(info);
+        }
+        div.style.width = '100%';
+        div.style.height = '100%';
+        div.style.cursor = editMode ? 'grab' : 'pointer';
+
+        cell.innerHTML = '';
+        cell.style.border = 'none';
+        cell.style.padding = '0';
+        cell.appendChild(div);
+
+        if (editMode) {
+          div.draggable = true;
+          div.style.cursor = 'grab';
+          div.title = 'Drag to move • Right-click to delete';
+
+          div.addEventListener('dragstart', (e) => {
+            draggedTable = table;
+            draggedFloor = floor;
+            e.dataTransfer.effectAllowed = 'move';
+            div.style.opacity = '0.5';
+          });
+
+          div.addEventListener('dragend', (e) => {
+            div.style.opacity = '1';
+          });
+
+          div.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            if (confirm(`Delete table ${table.number}?`)) {
+              tables[floor] = tables[floor].filter(t => t.number !== table.number);
+              saveData();
+              renderFloor();
+              setupTableSelection();
+            }
+          });
+        } else {
+          div.addEventListener('click', () => {
+            showTableReservation(table.number, viewDate);
+          });
+        }
+      }
+    }
+  }
+}
+
+function renderTableOptions(area) {
+  const container = document.getElementById('res-table-options');
+  if (!area) {
+    container.innerHTML = '<small style="color: #666;">Select area first...</small>';
+    return;
+  }
+
+  const list = tables[area] || [];
+  if (!list.length) {
+    container.innerHTML = '<small style="color: #666;">No tables in this area.</small>';
+    return;
+  }
+
+  container.innerHTML = list.map(t => `
+    <label class="table-option">
+      <input type="checkbox" value="${t.number}">
+      <span>Table ${t.number}</span>
+    </label>
+  `).join('');
+}
+
+function setupTableSelection() {
+  const areaSelect = document.getElementById('res-area');
+  areaSelect.onchange = function() {
+    renderTableOptions(this.value);
+  };
+}
+
+function setLayoutDate(date) {
+  layoutDate = date || new Date().toISOString().split('T')[0];
+  document.getElementById('layout-date').value = layoutDate;
+  renderFloor();
+}
+
+function saveSettings() {
+  settings.minGap = parseInt(document.getElementById('min-gap').value);
+  settings.duration = parseInt(document.getElementById('duration').value);
+  saveData();
+  showNotification('Settings saved successfully!', 'success');
+}
+
+function clearAllData() {
+  reservations = [];
+  tables = { ...TABLES };
+  saveData();
+  updateDashboard();
+  renderFloor();
+}
+
+// NOTIFICATION SYSTEM
+function showNotification(message, type = 'info') {
+  const notif = document.createElement('div');
+  notif.className = `notification ${type}`;
+  notif.textContent = message;
+  document.body.appendChild(notif);
+
+  setTimeout(() => {
+    notif.classList.add('removing');
+    setTimeout(() => {
+      notif.remove();
+    }, 300);
+  }, 3000);
+}
+
+// Initialize date input
+document.getElementById('res-date').valueAsDate = new Date();
+
+// Render custom fields in reservation form
+function renderReservationCustomFields() {
+  const container = document.getElementById('custom-fields-form');
+  if (customFields.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  container.innerHTML = customFields.map(field => {
+    const inputType = field.type === 'number' ? 'number' : field.type === 'password' ? 'password' : 'text';
+    return `
+    <div class="form-group">
+      <label>${field.name}</label>
+      <input type="${inputType}"
+             id="custom-${field.name}"
+             data-field-name="${field.name}"
+             placeholder="${field.name}">
+    </div>
+  `;
+  }).join('');
+}
+
+// Filter phone input to numbers and basic symbols only
+document.getElementById('res-phone').addEventListener('input', function(e) {
+  this.value = this.value.replace(/[^0-9\+\-\s]/g, '');
+});
+
+// Export guests to Excel
+function exportGuestsToExcel() {
+  const today = new Date().toISOString().split('T')[0];
+  const todayRes = reservations.filter(r => r.date === today);
+
+  if (todayRes.length === 0) {
+    showNotification('No reservations to export today', 'error');
+    return;
+  }
+
+  // Template headers
+  const headers = [
+    'First Name *', 'Last Name', 'Phone Number *', 'Card', 'Email', 'Points Earned',
+    'Temporary Points', 'Temporary Points Expiration Date', 'Birth Date', 'Total Spend',
+    'Total Orders', 'ZIP Code *', 'Full Address *', 'Intercom', 'Apartment', 'Floor',
+    'City', 'Country', 'Group 1', 'Group 2', 'Group 3', 'Notes', 'Credit limit', 'Credit balance'
+  ];
+
+  // Map reservation data to template
+  const rows = todayRes.map(res => {
+    const names = res.name.trim().split(/\s+/);
+    const firstName = names[0] || '';
+    const lastName = names.slice(1).join(' ') || '';
+
+    // Build notes with reservation details
+    let notes = `${tableLabel(res)} • ${res.time} • ${res.party} guests`;
+    if (res.bookingMethod) {
+      notes += ` • ${res.bookingMethod}`;
+    }
+
+    return [
+      firstName,           // First Name
+      lastName,            // Last Name
+      res.phone || '',     // Phone Number
+      '',                  // Card
+      '',                  // Email
+      '',                  // Points Earned
+      '',                  // Temporary Points
+      '',                  // Temporary Points Expiration Date
+      '',                  // Birth Date
+      '',                  // Total Spend
+      '',                  // Total Orders
+      '',                  // ZIP Code
+      '',                  // Full Address
+      '',                  // Intercom
+      '',                  // Apartment
+      '',                  // Floor
+      '',                  // City
+      '',                  // Country
+      '',                  // Group 1
+      '',                  // Group 2
+      '',                  // Group 3
+      notes,               // Notes
+      '',                  // Credit limit
+      ''                   // Credit balance
+    ];
+  });
+
+  // Create workbook
+  const wb = XLSX.utils.book_new();
+  const wsData = [headers, ...rows];
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+  // Set column widths
+  ws['!cols'] = [
+    { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 12 }, { wch: 20 },
+    { wch: 12 }, { wch: 15 }, { wch: 20 }, { wch: 12 }, { wch: 12 },
+    { wch: 12 }, { wch: 12 }, { wch: 20 }, { wch: 12 }, { wch: 12 },
+    { wch: 10 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 },
+    { wch: 12 }, { wch: 40 }, { wch: 12 }, { wch: 12 }
+  ];
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Guests');
+
+  // Generate filename with date
+  const dateStr = new Date().toISOString().split('T')[0];
+  const filename = `Charlys_Guests_${dateStr}.xlsx`;
+
+  XLSX.writeFile(wb, filename);
+  showNotification(`✓ Exported ${todayRes.length} guest(s)`, 'success');
+}
+
+renderReservationCustomFields();
+</script>
+
+</body>
+</html>
