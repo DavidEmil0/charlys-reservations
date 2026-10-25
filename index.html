@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Charly's Reservations</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Bodoni+Moda:wght@400;500;600&family=Italiana&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --olive: #273b2f;
+      --olive: #5c1b1f;
       --cream: #f4efe5;
       --gold: #b99a67;
       --ink: #27302b;
@@ -28,7 +28,7 @@
     #password-gate {
       position: fixed;
       inset: 0;
-      background: linear-gradient(135deg, #273b2f 0%, #1a241e 100%);
+      background: linear-gradient(135deg, #5c1b1f 0%, #3a1013 100%);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -85,7 +85,7 @@
     input:focus, select:focus {
       outline: none;
       border-color: var(--olive);
-      box-shadow: 0 0 0 3px rgba(39, 59, 47, 0.1);
+      box-shadow: 0 0 0 3px rgba(92, 27, 31, 0.1);
     }
 
     button {
@@ -123,16 +123,66 @@
     }
 
     .header {
-      background: linear-gradient(135deg, #273b2f 0%, #1a241e 100%);
+      background: linear-gradient(135deg, #5c1b1f 0%, #3a1013 100%);
       color: white;
       padding: 3rem 2rem;
       text-align: center;
     }
 
-    .header h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: 2rem;
-      margin: 0;
+    /* BRAND LOGO (text version of the Charly's logo) */
+    .brand-logo {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      color: #f4efe5;
+      font-family: 'Italiana', 'Bodoni Moda', serif;
+    }
+
+    .brand-main {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .brand-name {
+      font-size: 3.8rem;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      line-height: 1;
+    }
+
+    .brand-estd,
+    .brand-year {
+      font-family: 'Cinzel', serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .brand-sub {
+      font-family: 'Cinzel', serif;
+      margin-top: 0.6rem;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .brand-img {
+      display: block;
+      width: min(440px, 85%);
+      height: auto;
+      margin: 0 auto;
+    }
+
+    .password-header .brand-name {
+      font-size: 2.6rem;
+    }
+
+    .header .brand-name {
+      font-size: 3.4rem;
     }
 
     .nav {
@@ -309,10 +359,10 @@
     }
 
     .add-table-btn {
-      background: #7c3aed !important;
+      background: #5c1b1f !important;
       color: white !important;
       padding: 1.5rem !important;
-      border: 2px dashed #7c3aed !important;
+      border: 2px dashed #5c1b1f !important;
       border-radius: 8px !important;
       font-size: 1rem !important;
       font-weight: 600 !important;
@@ -327,8 +377,8 @@
     }
 
     .add-table-btn:hover {
-      background: #6d28d9 !important;
-      border-color: #6d28d9 !important;
+      background: #7a2a2e !important;
+      border-color: #7a2a2e !important;
       transform: scale(1.02);
     }
 
@@ -392,7 +442,7 @@
     .date-nav #date-picker:focus {
       outline: none;
       border-color: var(--olive);
-      box-shadow: 0 0 0 3px rgba(39, 59, 47, 0.1);
+      box-shadow: 0 0 0 3px rgba(92, 27, 31, 0.1);
     }
 
     /* TABLE GRID */
@@ -492,7 +542,7 @@
 
     .table-option:has(input:checked) {
       border-color: var(--olive);
-      background: #e9efe9;
+      background: #f3e7e7;
     }
 
     /* LAYOUT DATE BAR */
@@ -705,8 +755,8 @@
 <div id="password-gate">
   <div class="password-box">
     <div class="password-header">
-      <h1>Charly's</h1>
-      <p style="margin: 0; font-size: 0.9rem; opacity: 0.8;">Reservations Desk</p>
+      <img src="logo.png" alt="Charly's Hot Stone Steak, Estd 2019" class="brand-img">
+      <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; opacity: 0.8;">Reservations Desk</p>
     </div>
     <div class="password-form">
       <div class="form-group">
@@ -727,7 +777,7 @@
 <div id="main-content" class="hidden">
   <!-- HEADER -->
   <div class="header">
-    <h1>Charly's Hot Stone Steak</h1>
+    <img src="logo.png" alt="Charly's Hot Stone Steak, Estd 2019" class="brand-img">
     <div class="nav">
       <button class="view-btn active" data-view="dashboard">Dashboard</button>
       <button class="view-btn" data-view="reserve">Reserve Table</button>
@@ -797,11 +847,6 @@
             <label>Booking Method</label>
             <select id="res-booking-method">
               <option value="">Select booking method...</option>
-              <option value="whatsapp">WhatsApp</option>
-              <option value="phone">Phone Call</option>
-              <option value="instagram">Instagram</option>
-              <option value="website">Website</option>
-              <option value="messenger">Messenger</option>
             </select>
           </div>
           <div id="custom-fields-form"></div>
@@ -912,13 +957,23 @@
           <!-- Custom fields will be listed here -->
         </div>
 
-        <button id="manage-custom-fields-btn" style="background: #7c3aed; margin-bottom: 1rem;">+ Add Custom Field</button>
+        <button id="manage-custom-fields-btn" style="background: #5c1b1f; margin-bottom: 1rem;">+ Add Custom Field</button>
+      </div>
+
+      <div class="card" style="margin-top: 2rem;">
+        <h3 style="margin-top: 0;">Booking Methods</h3>
+        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Options shown when adding or editing a reservation.</p>
+        <div id="booking-method-list" style="margin-bottom: 1rem;"></div>
+        <div style="display: flex; gap: 0.5rem;">
+          <input type="text" id="new-booking-method" placeholder="e.g., Email" maxlength="30">
+          <button type="button" id="add-booking-method-btn" style="background: #5c1b1f; white-space: nowrap;">+ Add</button>
+        </div>
       </div>
 
       <div class="card" style="margin-top: 2rem;">
         <h3 style="margin-top: 0;">Export Data</h3>
         <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Export today's reservations to your customer template file.</p>
-        <button onclick="exportGuestsToExcel()" style="background: #7c3aed; color: white; padding: 0.75rem 2rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem; width: 100%;">📥 Export Guests to Excel</button>
+        <button onclick="exportGuestsToExcel()" style="background: #5c1b1f; color: white; padding: 0.75rem 2rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem; width: 100%;">📥 Export Guests to Excel</button>
       </div>
     </div>
 
@@ -988,11 +1043,6 @@
       <label>Booking Method</label>
       <select id="edit-res-booking-method">
         <option value="">Select booking method...</option>
-        <option value="whatsapp">WhatsApp</option>
-        <option value="phone">Phone Call</option>
-        <option value="instagram">Instagram</option>
-        <option value="website">Website</option>
-        <option value="messenger">Messenger</option>
       </select>
     </div>
     <div class="form-group">
@@ -1195,6 +1245,16 @@ let guestLeftPendingIndex = null;
 let selectedDate = null;
 // Date shown on the Table Layout view (defaults to today)
 let layoutDate = new Date().toISOString().split('T')[0];
+// Booking methods: editable list shown in the reservation dropdowns
+const DEFAULT_BOOKING_METHODS = [
+  { value: 'whatsapp', label: 'WhatsApp' },
+  { value: 'phone', label: 'Phone Call' },
+  { value: 'instagram', label: 'Instagram' },
+  { value: 'website', label: 'Website' },
+  { value: 'messenger', label: 'Messenger' },
+  { value: 'in-restaurant', label: 'In Restaurant' }
+];
+let bookingMethods = DEFAULT_BOOKING_METHODS.map(m => ({ ...m }));
 const CANCEL_PIN = '1234';
 
 // LOAD DATA
@@ -1213,6 +1273,7 @@ function applySnapshot(s) {
   if (s.completedReservations) completedReservations = s.completedReservations;
   if (s.settings) settings = s.settings;
   if (s.customFields) customFields = s.customFields;
+  if (s.bookingMethods && s.bookingMethods.length) bookingMethods = s.bookingMethods;
   if (s.tables) {
     tables = s.tables;
     // Migrate old format (array of numbers) to new format (array of objects)
@@ -1235,6 +1296,62 @@ async function loadData() {
   document.getElementById('min-gap').value = settings.minGap;
   document.getElementById('duration').value = settings.duration;
   renderCustomFieldsList();
+  renderBookingOptions();
+  renderBookingMethodList();
+}
+
+function bookingLabel(value) {
+  const m = bookingMethods.find(b => b.value === value);
+  return m ? m.label : (value || '');
+}
+
+function renderBookingOptions() {
+  const options = '<option value="">Select booking method...</option>' +
+    bookingMethods.map(m => `<option value="${m.value}">${m.label}</option>`).join('');
+  document.getElementById('res-booking-method').innerHTML = options;
+  document.getElementById('edit-res-booking-method').innerHTML = options;
+}
+
+function renderBookingMethodList() {
+  const list = document.getElementById('booking-method-list');
+  list.innerHTML = bookingMethods.map(m => `
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+      <span>${m.label}</span>
+      <button type="button" onclick="removeBookingMethod('${m.value}')" style="background: #ef4444; padding: 0.3rem 0.7rem; font-size: 0.85rem;">Remove</button>
+    </div>
+  `).join('');
+}
+
+function addBookingMethod() {
+  const input = document.getElementById('new-booking-method');
+  const label = input.value.trim();
+  if (!label) {
+    showNotification('Enter a booking method name', 'error');
+    return;
+  }
+  const value = label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || ('method-' + Date.now());
+  if (bookingMethods.some(m => m.value === value || m.label.toLowerCase() === label.toLowerCase())) {
+    showNotification('That booking method already exists', 'error');
+    return;
+  }
+  bookingMethods.push({ value, label });
+  input.value = '';
+  saveData();
+  renderBookingOptions();
+  renderBookingMethodList();
+  showNotification(`Added "${label}"`, 'success');
+}
+
+function removeBookingMethod(value) {
+  const used = reservations.filter(r => r.bookingMethod === value).length;
+  if (used) {
+    showNotification(`Can't remove: used by ${used} reservation(s)`, 'error');
+    return;
+  }
+  bookingMethods = bookingMethods.filter(m => m.value !== value);
+  saveData();
+  renderBookingOptions();
+  renderBookingMethodList();
 }
 
 // Saves are queued one after another so they reach the database in order.
@@ -1243,7 +1360,7 @@ function saveData() {
     showNotification('View only: changes are not saved', 'error');
     return;
   }
-  const snapshot = { reservations, cancelledReservations, completedReservations, settings, customFields, tables };
+  const snapshot = { reservations, cancelledReservations, completedReservations, settings, customFields, tables, bookingMethods };
   pendingSaves++;
   saveChain = saveChain.then(async () => {
     const { error } = await sb.from('app_state').upsert({ id: 'main', data: snapshot, updated_at: new Date().toISOString() });
@@ -1259,7 +1376,12 @@ async function refreshFromCloud() {
   try {
     const { data, error } = await sb.from('app_state').select('data').eq('id', 'main').maybeSingle();
     if (error || !data || !data.data || pendingSaves > 0) return;
+    const methodsBefore = JSON.stringify(bookingMethods);
     applySnapshot(data.data);
+    if (JSON.stringify(bookingMethods) !== methodsBefore) {
+      renderBookingOptions();
+      renderBookingMethodList();
+    }
     updateDashboard();
     updateCancelledList();
     renderFloor();
@@ -1414,6 +1536,9 @@ function setupEventListeners() {
     document.getElementById('clear-reservations-modal').classList.remove('active');
     document.getElementById('clear-reservations-password').value = '';
   });
+
+  // Booking methods (Settings)
+  document.getElementById('add-booking-method-btn').addEventListener('click', addBookingMethod);
 
   // View reservation modal
   document.getElementById('view-res-close').addEventListener('click', () => {
@@ -2074,19 +2199,13 @@ function updateDashboard() {
   if (today_res.length) {
     html += today_res.sort((a, b) => a.time.localeCompare(b.time)).map((r, idx) => {
       const realIndex = reservations.indexOf(r);
-      const bookingMethodLabel = {
-        whatsapp: '📱 WhatsApp',
-        phone: '☎️ Phone',
-        instagram: '📸 Instagram',
-        website: '🌐 Website',
-        messenger: '💬 Messenger'
-      }[r.bookingMethod] || '';
+      const bookingMethodLabel = bookingLabel(r.bookingMethod);
       return `
         <div class="reservation-item">
           <div class="reservation-info">
             <strong>${r.name}</strong>
             <small>${tableLabel(r)} at ${r.time} • ${r.party} guests</small>
-            ${bookingMethodLabel ? `<small style="color: #7c3aed; margin-top: 0.25rem; display: block;">${bookingMethodLabel}</small>` : ''}
+            ${bookingMethodLabel ? `<small style="color: #5c1b1f; margin-top: 0.25rem; display: block;">${bookingMethodLabel}</small>` : ''}
           </div>
           ${displayReservationActions(realIndex)}
         </div>
@@ -2174,7 +2293,7 @@ function showTableReservation(tableNumber, date) {
       `;
 
       if (reservation.bookingMethod) {
-        html += `<div><strong>Booking Method:</strong> ${reservation.bookingMethod}</div>`;
+        html += `<div><strong>Booking Method:</strong> ${bookingLabel(reservation.bookingMethod)}</div>`;
       }
 
       if (reservation.customData && Object.keys(reservation.customData).length > 0) {
@@ -2448,7 +2567,7 @@ function exportGuestsToExcel() {
     // Build notes with reservation details
     let notes = `${tableLabel(res)} • ${res.time} • ${res.party} guests`;
     if (res.bookingMethod) {
-      notes += ` • ${res.bookingMethod}`;
+      notes += ` • ${bookingLabel(res.bookingMethod)}`;
     }
 
     return [
