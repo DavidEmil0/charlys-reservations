@@ -515,6 +515,7 @@
     body.readonly .edit-res-btn,
     body.readonly .guest-left-btn,
     body.readonly #view-res-edit,
+    body.readonly .customer-edit,
     body.readonly #reservation-details button[onclick^="editReservationFromTable"] {
       display: none !important;
     }
@@ -783,6 +784,7 @@
       <button class="view-btn" data-view="reserve">Reserve Table</button>
       <button class="view-btn" data-view="floor">Table Layout</button>
       <button class="view-btn" data-view="cancelled">Cancelled</button>
+      <button class="view-btn" data-view="customers">Customer Data</button>
       <button class="view-btn" data-view="settings">Settings</button>
     </div>
   </div>
@@ -928,6 +930,21 @@
         <div class="reservation-list" id="cancelled-list">
           <p style="color: #999;">No cancelled reservations.</p>
         </div>
+      </div>
+    </div>
+
+    <!-- CUSTOMER DATA VIEW -->
+    <div id="customers" class="view">
+      <h2>Customer Data</h2>
+      <div class="card">
+        <div class="customer-edit" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem;">
+          <input type="text" id="customer-name" placeholder="Customer name" maxlength="60" style="flex: 2; min-width: 160px;">
+          <input type="tel" id="customer-phone" placeholder="Phone number" maxlength="25" style="flex: 1; min-width: 140px;">
+          <button type="button" onclick="addCustomer()" style="background: #5c1b1f; white-space: nowrap;">+ Add Customer</button>
+        </div>
+        <input type="text" id="customer-search" placeholder="Search by name or phone" oninput="renderCustomers()" style="margin-bottom: 1rem;">
+        <p id="customers-count" style="color: #666; font-size: 0.9rem;"></p>
+        <div id="customers-list"></div>
       </div>
     </div>
 
@@ -1237,6 +1254,8 @@ let cancelledReservations = [];
 let completedReservations = [];
 let settings = { minGap: 150, duration: 120 };
 let customFields = []; // Array of { name, type } objects
+// Customer Data: array of { name, phone }
+let customers = [];
 let tables = { ...TABLES };
 let editMode = false;
 let cancelPendingIndex = null;
@@ -1273,6 +1292,7 @@ function applySnapshot(s) {
   if (s.completedReservations) completedReservations = s.completedReservations;
   if (s.settings) settings = s.settings;
   if (s.customFields) customFields = s.customFields;
+  if (s.customers) customers = s.customers;
   if (s.bookingMethods && s.bookingMethods.length) bookingMethods = s.bookingMethods;
   if (s.tables) {
     tables = s.tables;
@@ -1360,7 +1380,7 @@ function saveData() {
     showNotification('View only: changes are not saved', 'error');
     return;
   }
-  const snapshot = { reservations, cancelledReservations, completedReservations, settings, customFields, tables, bookingMethods };
+  const snapshot = { reservations, cancelledReservations, completedReservations, settings, customFields, customers, tables, bookingMethods };
   pendingSaves++;
   saveChain = saveChain.then(async () => {
     const { error } = await sb.from('app_state').upsert({ id: 'main', data: snapshot, updated_at: new Date().toISOString() });
@@ -1750,6 +1770,7 @@ function switchView(viewName) {
   if (viewName === 'floor') renderFloor();
   if (viewName === 'dashboard') updateDashboard();
   if (viewName === 'cancelled') updateCancelledList();
+  if (viewName === 'customers') renderCustomers();
 }
 
 // TABLE FUNCTIONS
@@ -2247,6 +2268,64 @@ function displayReservationActions(reservationIndex) {
       <button class="guest-left-btn" onclick="showGuestLeftModal(${reservationIndex})">Guest Left</button>
     </div>
   `;
+}
+
+// CUSTOMER DATA
+function customerEsc(s) {
+  return String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
+}
+
+function renderCustomers() {
+  const list = document.getElementById('customers-list');
+  const search = document.getElementById('customer-search').value.trim().toLowerCase();
+  const sorted = customers
+    .map((c, idx) => ({ ...c, idx }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const shown = sorted.filter(c => !search || c.name.toLowerCase().includes(search) || c.phone.includes(search));
+
+  document.getElementById('customers-count').textContent =
+    `${customers.length} customer${customers.length === 1 ? '' : 's'}`;
+
+  if (shown.length === 0) {
+    list.innerHTML = '<p style="color: #999;">No customers yet.</p>';
+    return;
+  }
+
+  list.innerHTML = shown.map(c => `
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
+      <div>
+        <strong>${customerEsc(c.name)}</strong><br>
+        <span style="color: #666;">${customerEsc(c.phone)}</span>
+      </div>
+      <button type="button" class="customer-edit" onclick="deleteCustomer(${c.idx})"
+        style="background: #f8d7da; color: #721c24; padding: 0.5rem 1rem;">Delete</button>
+    </div>
+  `).join('');
+}
+
+function addCustomer() {
+  if (!canEdit) return;
+  const nameEl = document.getElementById('customer-name');
+  const phoneEl = document.getElementById('customer-phone');
+  const name = nameEl.value.trim();
+  const phone = phoneEl.value.trim();
+  if (!name || !phone) {
+    showNotification('Please enter both name and phone number', 'error');
+    return;
+  }
+  customers.push({ name, phone });
+  saveData();
+  nameEl.value = '';
+  phoneEl.value = '';
+  renderCustomers();
+  showNotification('Customer added', 'info');
+}
+
+function deleteCustomer(idx) {
+  if (!canEdit || !customers[idx]) return;
+  customers.splice(idx, 1);
+  saveData();
+  renderCustomers();
 }
 
 function updateCancelledList() {
