@@ -943,7 +943,10 @@
           <button type="button" onclick="addCustomer()" style="background: #5c1b1f; white-space: nowrap;">+ Add Customer</button>
         </div>
         <input type="text" id="customer-search" placeholder="Search by name or phone" oninput="renderCustomers()" style="margin-bottom: 1rem;">
-        <p id="customers-count" style="color: #666; font-size: 0.9rem;"></p>
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+          <p id="customers-count" style="color: #666; font-size: 0.9rem; margin: 0;"></p>
+          <button type="button" onclick="exportCustomersToExcel()" style="background: #5c1b1f; color: white;">📥 Export Customers to Excel</button>
+        </div>
         <div id="customers-list"></div>
       </div>
     </div>
@@ -989,7 +992,7 @@
 
       <div class="card" style="margin-top: 2rem;">
         <h3 style="margin-top: 0;">Export Data</h3>
-        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Export today's reservations to your customer template file.</p>
+        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Export today's reservations and saved Customer Data to your customer template file (one sheet).</p>
         <button onclick="exportGuestsToExcel()" style="background: #5c1b1f; color: white; padding: 0.75rem 2rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem; width: 100%;">📥 Export Guests to Excel</button>
       </div>
     </div>
@@ -2628,8 +2631,12 @@ function exportGuestsToExcel() {
   const today = new Date().toISOString().split('T')[0];
   const todayRes = reservations.filter(r => r.date === today);
 
-  if (todayRes.length === 0) {
-    showNotification('No reservations to export today', 'error');
+  // Saved customers that are not already in today's reservations (matched by phone)
+  const todayPhones = new Set(todayRes.map(r => String(r.phone || '').replace(/\D/g, '')));
+  const extraCustomers = customers.filter(c => !todayPhones.has(String(c.phone).replace(/\D/g, '')));
+
+  if (todayRes.length === 0 && extraCustomers.length === 0) {
+    showNotification('No reservations or customers to export', 'error');
     return;
   }
 
@@ -2642,7 +2649,7 @@ function exportGuestsToExcel() {
   ];
 
   // Map reservation data to template
-  const rows = todayRes.map(res => {
+  const reservationRows = todayRes.map(res => {
     const names = res.name.trim().split(/\s+/);
     const firstName = names[0] || '';
     const lastName = names.slice(1).join(' ') || '';
@@ -2681,6 +2688,19 @@ function exportGuestsToExcel() {
     ];
   });
 
+  // Saved customers go into the same sheet, using the same template columns
+  const customerRows = extraCustomers.map(c => {
+    const names = c.name.trim().split(/\s+/);
+    const row = new Array(headers.length).fill('');
+    row[0] = names[0] || '';                 // First Name
+    row[1] = names.slice(1).join(' ') || ''; // Last Name
+    row[2] = c.phone;                        // Phone Number
+    row[21] = 'Customer Data';               // Notes
+    return row;
+  });
+
+  const rows = [...reservationRows, ...customerRows];
+
   // Create workbook
   const wb = XLSX.utils.book_new();
   const wsData = [headers, ...rows];
@@ -2702,7 +2722,28 @@ function exportGuestsToExcel() {
   const filename = `Charlys_Guests_${dateStr}.xlsx`;
 
   XLSX.writeFile(wb, filename);
-  showNotification(`✓ Exported ${todayRes.length} guest(s)`, 'success');
+  showNotification(`✓ Exported ${todayRes.length} reservation(s) and ${extraCustomers.length} customer(s)`, 'success');
+}
+
+// Export all customers (name + phone) to an Excel file
+function exportCustomersToExcel() {
+  if (customers.length === 0) {
+    showNotification('No customers to export', 'error');
+    return;
+  }
+  const sorted = [...customers].sort((a, b) => a.name.localeCompare(b.name));
+  const wsData = [
+    ['Name', 'Phone Number'],
+    ...sorted.map(c => [c.name, c.phone])
+  ];
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols'] = [{ wch: 30 }, { wch: 18 }];
+  XLSX.utils.book_append_sheet(wb, ws, 'Customers');
+
+  const dateStr = new Date().toISOString().split('T')[0];
+  XLSX.writeFile(wb, `Charlys_Customers_${dateStr}.xlsx`);
+  showNotification(`✓ Exported ${sorted.length} customer(s)`, 'success');
 }
 
 renderReservationCustomFields();
