@@ -939,7 +939,7 @@
       <div class="card">
         <div class="customer-edit" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem;">
           <input type="text" id="customer-name" placeholder="Customer name" maxlength="60" style="flex: 2; min-width: 160px;">
-          <input type="tel" id="customer-phone" placeholder="Phone number" maxlength="25" style="flex: 1; min-width: 140px;">
+          <input type="tel" id="customer-phone" placeholder="Phone number (digits only)" maxlength="25" inputmode="numeric" pattern="[0-9]+" oninput="this.value = this.value.replace(/\D/g, '')" style="flex: 1; min-width: 140px;">
           <button type="button" onclick="addCustomer()" style="background: #5c1b1f; white-space: nowrap;">+ Add Customer</button>
         </div>
         <input type="text" id="customer-search" placeholder="Search by name or phone" oninput="renderCustomers()" style="margin-bottom: 1rem;">
@@ -2311,6 +2311,10 @@ function addCustomer() {
   const phone = phoneEl.value.trim();
   if (!name || !phone) {
     showNotification('Please enter both name and phone number', 'error');
+    return;
+  }
+  if (!/^\d+$/.test(phone)) {
+    showNotification('Phone number must contain numbers only', 'error');
     return;
   }
   customers.push({ name, phone });
