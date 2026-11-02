@@ -940,6 +940,17 @@
         <div class="customer-edit" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem;">
           <input type="text" id="customer-name" placeholder="Customer name" maxlength="60" style="flex: 2; min-width: 160px;">
           <input type="tel" id="customer-phone" placeholder="Phone number (digits only)" maxlength="25" inputmode="numeric" pattern="[0-9]+" oninput="this.value = this.value.replace(/\D/g, '')" style="flex: 1; min-width: 140px;">
+          <input type="date" id="customer-date" title="Date" style="flex: 1; min-width: 150px;">
+          <select id="customer-source" style="flex: 1; min-width: 200px;">
+            <option value="">How did you know about us?</option>
+            <option value="Friend">Friend</option>
+            <option value="TikTok">TikTok</option>
+            <option value="Instagram">Instagram</option>
+            <option value="Facebook">Facebook</option>
+            <option value="Gouna">Gouna</option>
+            <option value="By luck">By luck</option>
+          </select>
+          <input type="text" id="customer-residence" placeholder="Place of residence" maxlength="80" style="flex: 1; min-width: 180px;">
           <button type="button" onclick="addCustomer()" style="background: #5c1b1f; white-space: nowrap;">+ Add Customer</button>
         </div>
         <input type="text" id="customer-search" placeholder="Search by name or phone" oninput="renderCustomers()" style="margin-bottom: 1rem;">
@@ -2278,13 +2289,20 @@ function customerEsc(s) {
   return String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
 }
 
+// Today's date in local time as YYYY-MM-DD
+function todayLocal() {
+  return new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+}
+
 function renderCustomers() {
+  const dateEl = document.getElementById('customer-date');
+  if (dateEl && !dateEl.value) dateEl.value = todayLocal();
   const list = document.getElementById('customers-list');
   const search = document.getElementById('customer-search').value.trim().toLowerCase();
   const sorted = customers
     .map((c, idx) => ({ ...c, idx }))
     .sort((a, b) => a.name.localeCompare(b.name));
-  const shown = sorted.filter(c => !search || c.name.toLowerCase().includes(search) || c.phone.includes(search));
+  const shown = sorted.filter(c => !search || c.name.toLowerCase().includes(search) || (c.phone || '').includes(search) || (c.residence || '').toLowerCase().includes(search));
 
   document.getElementById('customers-count').textContent =
     `${customers.length} customer${customers.length === 1 ? '' : 's'}`;
@@ -2298,7 +2316,8 @@ function renderCustomers() {
     <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.75rem 0; border-bottom: 1px solid #eee;">
       <div>
         <strong>${customerEsc(c.name)}</strong><br>
-        <span style="color: #666;">${customerEsc(c.phone)}</span>
+        <span style="color: #666;">${customerEsc(c.phone)}</span><br>
+        <span style="color: #888; font-size: 0.85rem;">${c.date ? customerEsc(c.date) : '—'} · ${c.source ? customerEsc(c.source) : '—'} · ${c.residence ? customerEsc(c.residence) : '—'}</span>
       </div>
       <button type="button" class="customer-edit" onclick="deleteCustomer(${c.idx})"
         style="background: #f8d7da; color: #721c24; padding: 0.5rem 1rem;">Delete</button>
@@ -2320,10 +2339,31 @@ function addCustomer() {
     showNotification('Phone number must contain numbers only', 'error');
     return;
   }
-  customers.push({ name, phone });
+  const dateEl = document.getElementById('customer-date');
+  const sourceEl = document.getElementById('customer-source');
+  const residenceEl = document.getElementById('customer-residence');
+  const date = dateEl.value;
+  const source = sourceEl.value;
+  const residence = residenceEl.value.trim();
+  if (!date) {
+    showNotification('Please choose a date', 'error');
+    return;
+  }
+  if (!source) {
+    showNotification('Please choose how they found us', 'error');
+    return;
+  }
+  if (!residence) {
+    showNotification('Please enter their place of residence', 'error');
+    return;
+  }
+  customers.push({ name, phone, date, source, residence });
   saveData();
   nameEl.value = '';
   phoneEl.value = '';
+  sourceEl.value = '';
+  residenceEl.value = '';
+  dateEl.value = todayLocal();
   renderCustomers();
   showNotification('Customer added', 'info');
 }
@@ -2695,7 +2735,7 @@ function exportGuestsToExcel() {
     row[0] = names[0] || '';                 // First Name
     row[1] = names.slice(1).join(' ') || ''; // Last Name
     row[2] = c.phone;                        // Phone Number
-    row[21] = 'Customer Data';               // Notes
+    row[21] = ['Customer Data', c.date, c.source, c.residence].filter(Boolean).join(' • '); // Notes
     return row;
   });
 
@@ -2733,12 +2773,12 @@ function exportCustomersToExcel() {
   }
   const sorted = [...customers].sort((a, b) => a.name.localeCompare(b.name));
   const wsData = [
-    ['Name', 'Phone Number'],
-    ...sorted.map(c => [c.name, c.phone])
+    ['Name', 'Phone Number', 'Date', 'How did you know about us?', 'Place of Residence'],
+    ...sorted.map(c => [c.name, c.phone, c.date || '', c.source || '', c.residence || ''])
   ];
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(wsData);
-  ws['!cols'] = [{ wch: 30 }, { wch: 18 }];
+  ws['!cols'] = [{ wch: 30 }, { wch: 18 }, { wch: 14 }, { wch: 22 }, { wch: 30 }];
   XLSX.utils.book_append_sheet(wb, ws, 'Customers');
 
   const dateStr = new Date().toISOString().split('T')[0];
